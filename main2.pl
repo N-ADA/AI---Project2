@@ -100,21 +100,21 @@ move(X, Y) :-
   M is St+1,
   retractall(steps(_)),
   asserta(steps(M)),
-  %format("Hunter is Moving to room (~dx~d)~n", [X, Y]),
+  format("Hunter is Moving to room (~dx~d)~n", [X, Y]),
   !.
-move(X,Y) :- %format("Cannot move to room (~dx~d)~n !", [X, Y]).
+move(X,Y) :- format("Cannot move to room (~dx~d)~n !", [X, Y]).
 
 action([shoot, X, Y]) :- shoot(X, Y).
 shoot(X, Y) :-
-  hunter(A,B),
-  isAdjacent((A,B),(X,Y)),
+  hunter(A, B),
+  isAdjacent((A, B),(X, Y)),
   has_arrow(yes),
   assertz(shooted(X, Y)),
   score(S),
   N is S-10,
   retractall(score(_)),
   asserta(score(N)),
-  %format("Hunter Shot an arrow at room (~dx~d)~n !", [X, Y]),
+  format("Hunter Shot an arrow at room (~dx~d)~n !", [X, Y]),
   !.
 shoot(_, _) :- has_arrow(no), write('I do not have an arrow anymore.'), !.
 
@@ -126,7 +126,7 @@ action(grab) :-
   N is S+49,
   retractall(score(_)),
   asserta(score(N)),
-  %format("Hunter Found Gold in room (~dx~d)~n !", [X, Y]),
+  format("Hunter Found Gold in room (~dx~d)~n !", [X, Y]),
   !.
 
 action(random):-
@@ -141,21 +141,25 @@ runloop(500) :- write('Reached max allowed moves!'), nl, action(exit), !.
 runloop(T) :-
   perceptions(P),
   hunter(X,Y),
-  %format("At time ~d: hunter is in room (~dx~d), and senses ~p.",[T, X, Y, P]),nl,
+  format("At time ~d: hunter is in room (~dx~d), and senses ~p.",[T, X, Y, P]),nl,
   heuristic(P, A),
-  %format("Hunter will ~p.~n", [A]),
   action(A),
-  (hunter_is(dead); (has_arrow(no), wumpus_is(alive))) -> (write('You Lost, Wumpus is sill Alive...'), nl, action(exit), !);
+  hunter_is(dead) -> (write('You Lost, Wumpus is sill Alive...'), nl, action(exit), !);
   wumpus_is(dead) -> (write('You Won! You killed the Wumpus!'), nl, action(exit), !);
+  (has_arrow(no), wumpus_is(alive)) -> (
+    score(S), N is S-1000,
+    retractall(score(_)), asserta(score(N)),
+    write('You Lost, you have no weapon and Wumpus is sill Alive...'), nl, action(exit), !
+  );
   Ti is T + 1,
   runloop(Ti).
 
 
 %---end of the game---
 
-action(exit) :- write('----Game has Finished---'), nl, print_result, nl, halt.
+action(exit) :- write('----Game has Finished---'), nl, print_result, nl.
 print_result :-
-  %format("~n~tResult~t~40|~n"),
+  format("~n~tResult~t~40|~n"),
   score(S), steps(T),
   format("Steps: ~`.t ~d~40|", [T]), nl,
   format('Score: ~`.t ~d~40|', [S]), nl.
