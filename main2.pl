@@ -1,5 +1,5 @@
 :- abolish(hunter/2).
-:- abolish(pit/2).
+:- abolish(pit_at/2).
 :- abolish(gold/2).
 :- abolish(grab/2).
 :- abolish(visited/2).
@@ -11,7 +11,7 @@
 :- dynamic([
   hunter/2,
   wumpus/2,
-  pit/2,
+  pit_at/2,
   gold/2,
   grab/2,
   shooted/2,
@@ -48,7 +48,7 @@ has_gold(no).
 %---states of the players---
 
 hunter_is(dead):-
-	(hunter(X,Y), wumpus(X,Y), !; hunter(X,Y), pit(X,Y), !),
+	(hunter(X,Y), wumpus(X,Y), !; hunter(X,Y), pit_at(X,Y), !),
 	score(S), N is S-1000,
   retractall(score(_)), asserta(score(N)).
 hunter_is(alive).
@@ -69,7 +69,7 @@ has_glitter(no).
 has_stench(yes) :- hunter(X,Y), wumpus(A,B), isAdjacent((X,Y),(A,B)).
 has_stench(no).
 
-has_breeze(yes) :- hunter(X,Y), pit(A,B), isAdjacent((X,Y),(A,B)).
+has_breeze(yes) :- hunter(X,Y), pit_at(A,B), isAdjacent((X,Y),(A,B)).
 has_breeze(no).
 
 has_scream(yes):- wumpus_is(dead), !.
