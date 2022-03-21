@@ -1,7 +1,6 @@
 :- dynamic([
   stench_at/2,
-  breeze_at/2,
-  pit_at/2
+  breeze_at/2
 ]).
 
 no_pit_around(X, Y) :- neighbors([X, Y],[A, B]), has_pit(A, B, no).
@@ -38,13 +37,16 @@ has_pit(X, Y, maybe) :-
   (A is X - 1, B is Y - 1, breeze_at(A, Y), breeze_at(X, B), !).
 
 
-has_wumpus(X, Y, yes) :- stench_at(A, B), isAdjacent([X, Y],[A, B]), no_wumpus_around(A, B).
-has_wumpus(X, Y, yes) :- stench_at(A, B), isAdjacent([X, Y], [A, B]), all_adjacent_visited(A, B).
+has_wumpus(X, Y, yes) :- stench_at(A, B), isAdjacent([X, Y],[A, B]), no_wumpus_around(A, B), asserta(wumpus(X, Y)).
+has_wumpus(X, Y, yes) :- stench_at(A, B), isAdjacent([X, Y], [A, B]), all_adjacent_visited(A, B), asserta(wumpus(X, Y)).
 has_wumpus(X, Y, yes) :-
-  (A is X + 1, B is Y + 1, C is Y - 1, stench_at(A, Y), stench_at(X, B), stench_at(X, C), !);
-  (A is X - 1, B is Y + 1, C is Y - 1, stench_at(A, Y), stench_at(X, B), stench_at(X, C), !);
-  (A is X - 1, B is Y - 1, C is X + 1, stench_at(A, Y), stench_at(X, B), stench_at(C, Y), !);
-  (A is X + 1, B is Y - 1, C is X - 1, stench_at(A, Y), stench_at(X, B), stench_at(C, Y), !).
+  (
+    (A is X + 1, B is Y + 1, C is Y - 1, stench_at(A, Y), stench_at(X, B), stench_at(X, C), !);
+    (A is X - 1, B is Y + 1, C is Y - 1, stench_at(A, Y), stench_at(X, B), stench_at(X, C), !);
+    (A is X - 1, B is Y - 1, C is X + 1, stench_at(A, Y), stench_at(X, B), stench_at(C, Y), !);
+    (A is X + 1, B is Y - 1, C is X - 1, stench_at(A, Y), stench_at(X, B), stench_at(C, Y), !)
+  ),
+  asserta(wumpus(X, Y)).
 
 has_wumpus(X, Y, no):-
   (A is X + 1, B is Y, \+stench_at(A, B));
@@ -126,4 +128,8 @@ cost(X, Y, C) :- has_wumpus(X, Y, yes), C is 100.
 
 index_of([H|_], H, 0):- !.
 index_of([_|T], H, Index):- index_of(T, H, OldIndex), !, Index is OldIndex + 1.
+
+
+
+
 
